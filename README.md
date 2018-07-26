@@ -6,14 +6,19 @@ Use the `ixmonad` and `type-level-sets` libraries to build a permission monad.
 
 The idea is, to use a type-level set of type-level permissions to represent the permissions needed to get a value:
 ```Haskell
+-- Perm is an effect that required permissions
+-- n is a list of permissions
+-- a is a value that is protected by the list of permissions
+data Perm (Set (n :: [k])) (a :: *) = Value a
+
 type PersonId = Int
 type PersonName = String
-mapPersonName :: (PersonName -> PersonName) 
-              -> PersonId 
-              -> Perm ('Set '[ 'Read 'PersonName, 'Write 'PersonName]) PersonName
+modifyPersonName :: (PersonName -> PersonName) 
+                 -> PersonId 
+                 -> Perm ('Set '[ 'Read 'PersonName, 'Write 'PersonName]) ()
 ```
 
-The `PersonName` after this map can only be extracted by code that has proof they have the neccessary permissions.
+The unit after this map can only be extracted (and thus the effect executed) by code that has proof they have the neccessary permissions.
 
 Importantly, this is implemented using an indexed monad, such that the programmer does not need to handle type level permissions themselves:
 
